@@ -109,6 +109,20 @@ function BracketContent() {
     ? bracket.find((m) => m._id === selectedMatchupId) ?? null
     : null;
 
+  // Navigation list for prev/next: all non-locked matchups in bracket order
+  const navList = bracket.filter((m) => m.status !== "locked");
+  const navIndex = selectedMatchup ? navList.findIndex((m) => m._id === selectedMatchup._id) : -1;
+
+  const navigateTo = useCallback((matchup: MatchupData) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("matchup", matchup._id);
+    router.replace(`/bracket?${params.toString()}`, { scroll: false });
+  }, [router, searchParams]);
+
+  const onPrev = navIndex > 0 ? () => navigateTo(navList[navIndex - 1]) : null;
+  const onNext = navIndex >= 0 && navIndex < navList.length - 1 ? () => navigateTo(navList[navIndex + 1]) : null;
+  const positionLabel = navIndex >= 0 ? `${navIndex + 1} of ${navList.length}` : undefined;
+
   function switchParticipant() {
     localStorage.removeItem("toon-madness-participant");
     router.push("/");
@@ -237,6 +251,9 @@ function BracketContent() {
           matchup={selectedMatchup}
           participantSlug={participantSlug}
           onClose={closeMatchup}
+          onPrev={onPrev}
+          onNext={onNext}
+          positionLabel={positionLabel}
         />
       )}
     </div>

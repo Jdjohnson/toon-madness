@@ -295,12 +295,48 @@ body {
   animation: detail-scale-in 0.3s ease;
 }
 
+/* Top bar */
+.detail-topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
 .detail-close {
-  position: absolute;
-  top: 8px;
-  right: 8px;
   width: 40px;
   height: 40px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.detail-close:hover {
+  background: var(--bg-surface);
+  color: var(--text);
+}
+
+.detail-position-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* Prev/Next nav arrows */
+.detail-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background: var(--bg-card);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -313,9 +349,27 @@ body {
   z-index: 2;
 }
 
-.detail-close:hover {
+.detail-nav:hover {
   background: var(--bg-surface);
   color: var(--text);
+  border-color: var(--accent);
+}
+
+.detail-nav-prev {
+  left: -60px;
+}
+
+.detail-nav-next {
+  right: -60px;
+}
+
+@media (max-width: 1040px) {
+  .detail-nav-prev {
+    left: 4px;
+  }
+  .detail-nav-next {
+    right: 4px;
+  }
 }
 
 /* Progress bar */
@@ -323,8 +377,7 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 32px;
-  justify-content: center;
+  margin-left: auto;
 }
 
 .detail-progress-bar {

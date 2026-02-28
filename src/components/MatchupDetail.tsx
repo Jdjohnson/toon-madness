@@ -10,9 +10,12 @@ interface MatchupDetailProps {
   matchup: MatchupData;
   participantSlug: string;
   onClose: () => void;
+  onPrev: (() => void) | null;
+  onNext: (() => void) | null;
+  positionLabel?: string;
 }
 
-export default function MatchupDetail({ matchup, participantSlug, onClose }: MatchupDetailProps) {
+export default function MatchupDetail({ matchup, participantSlug, onClose, onPrev, onNext, positionLabel }: MatchupDetailProps) {
   const castVote = useMutation(api.votes.castVote);
 
   const isActive = matchup.status === "active";
@@ -21,14 +24,16 @@ export default function MatchupDetail({ matchup, participantSlug, onClose }: Mat
   const totalVoters = 6;
   const uniqueVoters = new Set(matchup.votes.map((v) => v.participantSlug)).size;
 
-  // Close on Escape
+  // Keyboard: Escape to close, arrows to navigate
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft" && onPrev) onPrev();
+      if (e.key === "ArrowRight" && onNext) onNext();
     }
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
-  }, [onClose]);
+  }, [onClose, onPrev, onNext]);
 
   // Prevent body scroll while overlay is open
   useEffect(() => {
@@ -126,22 +131,41 @@ export default function MatchupDetail({ matchup, participantSlug, onClose }: Mat
   return (
     <div className="detail-overlay" onClick={onClose}>
       <div className="detail-container" onClick={(e) => e.stopPropagation()}>
-        {/* Close button */}
-        <button className="detail-close" onClick={onClose}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-
-        {/* Vote progress */}
-        {isActive && (
-          <div className="detail-progress">
-            <div className="detail-progress-bar">
-              <div className="detail-progress-fill" style={{ width: `${(uniqueVoters / totalVoters) * 100}%` }} />
+        {/* Top bar: close + position + progress */}
+        <div className="detail-topbar">
+          <button className="detail-close" onClick={onClose}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+          {positionLabel && (
+            <span className="detail-position-label">{positionLabel}</span>
+          )}
+          {isActive && (
+            <div className="detail-progress">
+              <div className="detail-progress-bar">
+                <div className="detail-progress-fill" style={{ width: `${(uniqueVoters / totalVoters) * 100}%` }} />
+              </div>
+              <span className="detail-progress-text">{uniqueVoters}/{totalVoters} voted</span>
             </div>
-            <span className="detail-progress-text">{uniqueVoters}/{totalVoters} voted</span>
-          </div>
+          )}
+        </div>
+
+        {/* Prev/Next arrows */}
+        {onPrev && (
+          <button className="detail-nav detail-nav-prev" onClick={onPrev}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+        )}
+        {onNext && (
+          <button className="detail-nav detail-nav-next" onClick={onNext}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 6 15 12 9 18" />
+            </svg>
+          </button>
         )}
 
         {/* Arena */}
