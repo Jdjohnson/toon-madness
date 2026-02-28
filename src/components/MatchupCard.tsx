@@ -146,8 +146,17 @@ export default function MatchupCard({ matchup, participantSlug, compact }: Match
     );
   }
 
+  const totalVoters = 6;
+  // Count unique voters (not total votes per character)
+  const uniqueVoters = new Set(matchup.votes.map((v) => v.participantSlug)).size;
+
   return (
     <div className={`matchup-card ${matchup.status}`}>
+      {isActive && (
+        <div className="vote-progress">
+          <span>{uniqueVoters}/{totalVoters} voted</span>
+        </div>
+      )}
       {renderCharRow(matchup.topCharacter, "top")}
       {renderCharRow(matchup.bottomCharacter, "bottom")}
     </div>

@@ -56,6 +56,19 @@ body {
   opacity: 0.5;
 }
 
+/* Vote progress header */
+.vote-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: rgba(249, 115, 22, 0.08);
+  border-bottom: 1px solid rgba(249, 115, 22, 0.15);
+}
+
 /* Character row inside matchup */
 .char-row {
   display: flex;

@@ -1,5 +1,8 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
+
+const TOTAL_PARTICIPANTS = 6;
 
 export const castVote = mutation({
   args: {
@@ -50,74 +53,105 @@ export const castVote = mutation({
       });
     }
 
-    // Count votes for each character
+    // Count votes for this matchup
     const allVotes = await ctx.db
       .query("votes")
       .withIndex("by_matchup", (q) => q.eq("matchupId", args.matchupId))
       .collect();
 
-    // Recount including the vote we just cast/updated
-    const voteCounts = new Map<string, number>();
+    // Build accurate vote map (account for the upsert we just did)
+    const latestVotes = new Map<string, string>();
     for (const vote of allVotes) {
-      // If this is the voter who just voted, use their new choice
       if (vote.participantSlug === args.participantSlug) {
-        const count = voteCounts.get(args.characterId) || 0;
-        voteCounts.set(args.characterId, count + 1);
+        latestVotes.set(vote.participantSlug, args.characterId);
       } else {
-        const count = voteCounts.get(vote.characterId) || 0;
-        voteCounts.set(vote.characterId, count + 1);
+        latestVotes.set(vote.participantSlug, vote.characterId);
       }
     }
 
-    // Check for majority (4 out of 6)
-    const MAJORITY = 4;
+    // Not all participants have voted yet — wait
+    if (latestVotes.size < TOTAL_PARTICIPANTS) {
+      return { success: true, votesIn: latestVotes.size, totalNeeded: TOTAL_PARTICIPANTS };
+    }
+
+    // All 6 votes are in — determine winner by majority
+    const voteCounts = new Map<string, number>();
+    for (const charId of latestVotes.values()) {
+      voteCounts.set(charId, (voteCounts.get(charId) || 0) + 1);
+    }
+
+    // Find winner (most votes). On tie, higher seed (lower number) wins.
     let winnerId: string | null = null;
+    let winnerVotes = 0;
+    let winnerSeed = Infinity;
+
     for (const [charId, count] of voteCounts) {
-      if (count >= MAJORITY) {
+      const char = await ctx.db.get(charId as Id<"characters">);
+      const seed = char?.seed ?? Infinity;
+
+      if (count > winnerVotes || (count === winnerVotes && seed < winnerSeed)) {
         winnerId = charId;
-        break;
+        winnerVotes = count;
+        winnerSeed = seed;
       }
     }
 
-    if (winnerId) {
-      // Mark matchup as decided
-      await ctx.db.patch(args.matchupId, {
-        winnerId: winnerId as any,
-        status: "decided",
-      });
+    if (!winnerId) return { success: true };
 
-      // Advance winner to next round
-      if (matchup.round < 5) {
-        const nextRound = matchup.round + 1;
-        const nextPosition = Math.floor(matchup.position / 2);
-        const isTopSlot = matchup.position % 2 === 0;
+    // Mark matchup as decided
+    await ctx.db.patch(args.matchupId, {
+      winnerId: winnerId as any,
+      status: "decided",
+    });
 
-        const nextMatchup = await ctx.db
+    // Advance winner to next round slot
+    if (matchup.round < 5) {
+      const nextRound = matchup.round + 1;
+      const nextPosition = Math.floor(matchup.position / 2);
+      const isTopSlot = matchup.position % 2 === 0;
+
+      const nextMatchup = await ctx.db
+        .query("matchups")
+        .withIndex("by_round_position", (q) =>
+          q.eq("round", nextRound).eq("position", nextPosition)
+        )
+        .unique();
+
+      if (nextMatchup) {
+        const patch: Record<string, any> = {};
+        if (isTopSlot) {
+          patch.topCharacterId = winnerId;
+        } else {
+          patch.bottomCharacterId = winnerId;
+        }
+        await ctx.db.patch(nextMatchup._id, patch);
+      }
+
+      // Check if ALL matchups in this round are now decided
+      const roundMatchups = await ctx.db
+        .query("matchups")
+        .withIndex("by_round", (q) => q.eq("round", matchup.round))
+        .collect();
+
+      const allDecided = roundMatchups.every((m) => m.status === "decided");
+
+      if (allDecided) {
+        // Activate all next-round matchups that have both slots filled
+        const nextRoundMatchups = await ctx.db
           .query("matchups")
-          .withIndex("by_round_position", (q) =>
-            q.eq("round", nextRound).eq("position", nextPosition)
-          )
-          .unique();
+          .withIndex("by_round", (q) => q.eq("round", nextRound))
+          .collect();
 
-        if (nextMatchup) {
-          const patch: Record<string, any> = {};
-          if (isTopSlot) {
-            patch.topCharacterId = winnerId;
-          } else {
-            patch.bottomCharacterId = winnerId;
-          }
-
-          await ctx.db.patch(nextMatchup._id, patch);
-
-          // Check if both slots are now filled → activate
-          const updated = await ctx.db.get(nextMatchup._id);
-          if (updated && updated.topCharacterId && updated.bottomCharacterId) {
-            await ctx.db.patch(nextMatchup._id, { status: "active" });
+        for (const nm of nextRoundMatchups) {
+          // Re-read to get latest state (we may have just patched character slots)
+          const fresh = await ctx.db.get(nm._id);
+          if (fresh && fresh.topCharacterId && fresh.bottomCharacterId && fresh.status === "locked") {
+            await ctx.db.patch(nm._id, { status: "active" });
           }
         }
       }
     }
 
-    return { success: true };
+    return { success: true, decided: true, winnerId };
   },
 });
