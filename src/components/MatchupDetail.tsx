@@ -174,6 +174,31 @@ export default function MatchupDetail({ matchup, participantSlug, onClose, onPre
           <div className="detail-vs">VS</div>
           {renderPanel(matchup.bottomCharacter, "right")}
         </div>
+
+        {/* Mobile bottom nav bar */}
+        <div className="detail-bottom-nav">
+          <button
+            className="detail-bottom-nav-btn"
+            onClick={onPrev ?? undefined}
+            disabled={!onPrev}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          {positionLabel && (
+            <span className="detail-bottom-nav-label">{positionLabel}</span>
+          )}
+          <button
+            className="detail-bottom-nav-btn"
+            onClick={onNext ?? undefined}
+            disabled={!onNext}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 6 15 12 9 18" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -416,11 +416,89 @@ body {
   }
 
   .detail-container {
-    padding: 24px 16px;
+    padding: 16px 12px;
+  }
+
+  .detail-topbar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .detail-progress-bar {
+    width: auto;
+    flex: 1;
+    min-width: 80px;
+  }
+
+  .detail-panel {
+    padding: 20px 16px;
+    max-width: 100%;
+  }
+
+  .detail-avatar {
+    width: 120px;
+    height: 120px;
+  }
+
+  .detail-name {
+    font-size: 18px;
+  }
+
+  .detail-show {
+    font-size: 12px;
+  }
+
+  .detail-tagline {
+    font-size: 12px;
+    max-width: 100%;
+  }
+
+  .detail-vote-btn {
+    padding: 10px 32px;
+    font-size: 14px;
   }
 
   .detail-vs {
+    font-size: 24px;
     margin: 0 !important;
+  }
+
+  .detail-seed {
+    width: 26px;
+    height: 26px;
+    font-size: 12px;
+  }
+
+  .detail-voter-dot {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Hide absolute nav arrows on mobile */
+  .detail-nav {
+    display: none;
+  }
+
+  /* Show bottom nav bar on mobile */
+  .detail-bottom-nav {
+    display: flex;
+  }
+}
+
+/* Small phone adjustments */
+@media (max-width: 480px) {
+  .participant-card {
+    padding: 16px;
+  }
+
+  .participant-card img {
+    width: 72px;
+    height: 72px;
+  }
+
+  .vote-dot {
+    width: 14px;
+    height: 14px;
   }
 }
 
@@ -590,4 +668,44 @@ body {
   opacity: 0.5;
   flex-shrink: 0;
   user-select: none;
+}
+
+/* Bottom nav bar (mobile only) */
+.detail-bottom-nav {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.detail-bottom-nav-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.detail-bottom-nav-btn:hover:not(:disabled) {
+  background: var(--bg-surface);
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.detail-bottom-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.detail-bottom-nav-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
 }
