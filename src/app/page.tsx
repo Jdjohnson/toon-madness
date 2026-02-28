@@ -24,8 +24,8 @@ export default function Home() {
     if (slug) setExisting(slug);
   }, []);
 
-  // Use Convex data if available, otherwise use fallback
-  const participants = convexParticipants ?? FALLBACK_PARTICIPANTS;
+  // Use Convex data if available and non-empty, otherwise use fallback
+  const participants = convexParticipants?.length ? convexParticipants : FALLBACK_PARTICIPANTS;
 
   function pickParticipant(slug: string) {
     localStorage.setItem("toon-madness-participant", slug);
