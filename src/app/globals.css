@@ -409,7 +409,14 @@ body {
   gap: 24px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 899px) {
+  /* Make overlay scrollable on mobile */
+  .detail-overlay {
+    overflow-y: auto;
+    align-items: flex-start;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .detail-arena {
     flex-direction: column;
     gap: 16px;
@@ -422,6 +429,12 @@ body {
   .detail-topbar {
     flex-wrap: wrap;
     gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .detail-close {
+    width: 32px;
+    height: 32px;
   }
 
   .detail-progress-bar {
@@ -479,9 +492,13 @@ body {
     display: none;
   }
 
-  /* Show bottom nav bar on mobile */
+  /* Show bottom nav bar on mobile — sticky at bottom */
   .detail-bottom-nav {
-    display: flex;
+    display: flex !important;
+    position: sticky;
+    bottom: 0;
+    background: var(--bg);
+    padding: 12px 0;
   }
 }
 
@@ -499,6 +516,44 @@ body {
   .vote-dot {
     width: 14px;
     height: 14px;
+  }
+
+  /* Tighter detail panels for small phones */
+  .detail-panel {
+    padding: 12px;
+  }
+
+  .detail-avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .detail-avatar-wrap {
+    margin-bottom: 8px;
+  }
+
+  .detail-seed {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    margin-bottom: 8px;
+  }
+
+  .detail-name {
+    font-size: 16px;
+  }
+
+  .detail-tagline {
+    display: none;
+  }
+
+  .detail-voters {
+    margin-bottom: 8px;
+  }
+
+  .detail-vote-btn {
+    padding: 8px 24px;
+    font-size: 13px;
   }
 }
 
@@ -565,7 +620,7 @@ body {
   background: var(--bg-surface);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .detail-avatar {
     width: 200px;
     height: 200px;
