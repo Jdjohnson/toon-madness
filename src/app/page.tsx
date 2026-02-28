@@ -6,12 +6,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const FALLBACK_PARTICIPANTS = [
-  { name: "Jarsh", slug: "jarsh", description: "Big happy guy, beaming smile, jolly build" },
-  { name: "Morgan", slug: "morgan", description: "Woodworker, flannel, chisel/workbench" },
-  { name: "Joey", slug: "joey", description: "Pig farmer, pig under arm, rural charm" },
-  { name: "Josh", slug: "josh", description: "Golfer, polo shirt, golf club" },
-  { name: "David", slug: "david", description: "Battery-powered electric guy, lightning bolts" },
-  { name: "Jarad", slug: "jarad", description: "Robot, mechanical joints, friendly robot face" },
+  { name: "Jarsh", slug: "jarsh" },
+  { name: "Morgan", slug: "morgan" },
+  { name: "Joey", slug: "joey" },
+  { name: "Josh", slug: "josh" },
+  { name: "David", slug: "david" },
+  { name: "Jarad", slug: "jarad" },
 ];
 
 export default function Home() {
@@ -64,12 +64,6 @@ export default function Home() {
               }}
             />
             <div className="text-lg font-bold text-white">{p.name}</div>
-            <div
-              className="text-xs mt-1"
-              style={{ color: "var(--text-dim)" }}
-            >
-              {p.description}
-            </div>
           </button>
         ))}
       </div>
