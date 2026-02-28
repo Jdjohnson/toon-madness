@@ -56,6 +56,27 @@ body {
   opacity: 0.5;
 }
 
+/* Championship card */
+.matchup-card.championship {
+  border-color: var(--gold);
+  box-shadow: 0 0 24px rgba(251, 191, 36, 0.25), 0 0 48px rgba(251, 191, 36, 0.1);
+}
+
+.matchup-card.championship.active {
+  border-color: var(--gold);
+  box-shadow: 0 0 24px rgba(251, 191, 36, 0.35), 0 0 48px rgba(251, 191, 36, 0.15);
+}
+
+.matchup-card.championship.decided {
+  border-color: var(--gold);
+  box-shadow: 0 0 24px rgba(251, 191, 36, 0.25);
+}
+
+/* Round headers in split bracket */
+.round-header {
+  text-align: center;
+}
+
 /* Vote progress header */
 .vote-progress {
   display: flex;
@@ -240,4 +261,280 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--connector);
   border-radius: 3px;
+}
+
+/* ===== Matchup Detail Overlay ===== */
+
+@keyframes detail-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes detail-scale-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(10, 22, 40, 0.92);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: detail-fade-in 0.3s ease;
+}
+
+.detail-container {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  padding: 32px 24px;
+  animation: detail-scale-in 0.3s ease;
+}
+
+.detail-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  z-index: 2;
+}
+
+.detail-close:hover {
+  background: var(--bg-surface);
+  color: var(--text);
+}
+
+/* Progress bar */
+.detail-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  justify-content: center;
+}
+
+.detail-progress-bar {
+  width: 200px;
+  height: 6px;
+  background: var(--bg-card);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.detail-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.detail-progress-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* Arena layout */
+.detail-arena {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+@media (max-width: 767px) {
+  .detail-arena {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .detail-container {
+    padding: 24px 16px;
+  }
+
+  .detail-vs {
+    margin: 0 !important;
+  }
+}
+
+/* Character panel */
+.detail-panel {
+  flex: 1;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px;
+  border-radius: 16px;
+  background: var(--bg-card);
+  border: 2px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.3s ease;
+}
+
+.detail-panel.left {
+  border-color: rgba(249, 115, 22, 0.25);
+}
+
+.detail-panel.right {
+  border-color: rgba(59, 130, 246, 0.25);
+}
+
+.detail-panel.winner {
+  border-color: var(--green);
+  box-shadow: 0 0 30px rgba(34, 197, 94, 0.2);
+}
+
+.detail-panel.loser {
+  opacity: 0.4;
+}
+
+/* Seed badge in detail */
+.detail-seed {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+
+/* Avatar */
+.detail-avatar-wrap {
+  margin-bottom: 16px;
+}
+
+.detail-avatar {
+  width: 160px;
+  height: 160px;
+  border-radius: 16px;
+  object-fit: cover;
+  background: var(--bg-surface);
+}
+
+.detail-avatar.placeholder {
+  background: var(--bg-surface);
+}
+
+@media (min-width: 768px) {
+  .detail-avatar {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+/* Character info */
+.detail-name {
+  font-size: 22px;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 4px;
+}
+
+.detail-show {
+  font-size: 14px;
+  color: var(--text-dim);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.detail-tagline {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-align: center;
+  font-style: italic;
+  line-height: 1.5;
+  max-width: 280px;
+  margin-bottom: 16px;
+}
+
+/* Voter dots in detail */
+.detail-voters {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.detail-voter-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--bg-surface);
+  border: 2px solid var(--accent);
+}
+
+/* Vote button */
+.detail-vote-btn {
+  padding: 12px 40px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  border: none;
+  background: var(--accent);
+  color: white;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+}
+
+.detail-vote-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+
+.detail-vote-btn:active {
+  transform: scale(0.97);
+}
+
+.detail-vote-btn.voted {
+  background: var(--green);
+  cursor: default;
+}
+
+.detail-vote-btn.voted:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Winner badge */
+.detail-winner-badge {
+  margin-top: 12px;
+  padding: 8px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: white;
+  background: var(--green);
+}
+
+/* VS element */
+.detail-vs {
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--text-dim);
+  opacity: 0.5;
+  flex-shrink: 0;
+  user-select: none;
 }

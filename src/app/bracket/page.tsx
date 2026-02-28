@@ -2,10 +2,13 @@
 
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import MatchupCard from "@/components/MatchupCard";
+import type { MatchupData } from "@/components/MatchupCard";
 import WinnerBanner from "@/components/WinnerBanner";
+import BracketSide from "@/components/BracketSide";
+import MatchupDetail from "@/components/MatchupDetail";
 
 const ROUND_NAMES: Record<number, string> = {
   1: "Round of 32",
@@ -15,13 +18,16 @@ const ROUND_NAMES: Record<number, string> = {
   5: "Championship",
 };
 
-export default function BracketPage() {
+function BracketContent() {
   const bracket = useQuery(api.matchups.getBracket);
   const participants = useQuery(api.matchups.getParticipants);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [participantSlug, setParticipantSlug] = useState<string | null>(null);
   const [activeRound, setActiveRound] = useState(1);
   const [isMobile, setIsMobile] = useState(false);
+
+  const selectedMatchupId = searchParams.get("matchup");
 
   useEffect(() => {
     const slug = localStorage.getItem("toon-madness-participant");
@@ -53,6 +59,19 @@ export default function BracketPage() {
     }
   }, [bracket]);
 
+  const openMatchup = useCallback((matchup: MatchupData) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("matchup", matchup._id);
+    router.push(`/bracket?${params.toString()}`, { scroll: false });
+  }, [router, searchParams]);
+
+  const closeMatchup = useCallback(() => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("matchup");
+    const qs = params.toString();
+    router.push(qs ? `/bracket?${qs}` : "/bracket", { scroll: false });
+  }, [router, searchParams]);
+
   if (!participantSlug || !bracket || !participants) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -67,8 +86,28 @@ export default function BracketPage() {
   );
 
   // Check for champion
-  const championship = bracket.find((m) => m.round === 5);
-  const champion = championship?.status === "decided" ? championship.winner : null;
+  const championshipMatchup = bracket.find((m) => m.round === 5);
+  const champion = championshipMatchup?.status === "decided" ? championshipMatchup.winner : null;
+
+  // Split bracket: left side = R1 pos 0-7, R2 pos 0-3, R3 pos 0-1, R4 pos 0
+  // Right side = R1 pos 8-15, R2 pos 4-7, R3 pos 2-3, R4 pos 1
+  const leftRounds = [
+    roundGroups[0].filter((m) => m.position >= 0 && m.position <= 7),
+    roundGroups[1].filter((m) => m.position >= 0 && m.position <= 3),
+    roundGroups[2].filter((m) => m.position >= 0 && m.position <= 1),
+    roundGroups[3].filter((m) => m.position === 0),
+  ];
+  const rightRounds = [
+    roundGroups[0].filter((m) => m.position >= 8 && m.position <= 15),
+    roundGroups[1].filter((m) => m.position >= 4 && m.position <= 7),
+    roundGroups[2].filter((m) => m.position >= 2 && m.position <= 3),
+    roundGroups[3].filter((m) => m.position === 1),
+  ];
+
+  // Find the selected matchup for detail overlay
+  const selectedMatchup = selectedMatchupId
+    ? bracket.find((m) => m._id === selectedMatchupId) ?? null
+    : null;
 
   function switchParticipant() {
     localStorage.removeItem("toon-madness-participant");
@@ -135,7 +174,7 @@ export default function BracketPage() {
 
       {/* Bracket */}
       {isMobile ? (
-        // Mobile: single round view
+        // Mobile: single round view (unchanged)
         <div className="p-4 flex flex-col gap-3">
           <h2 className="text-lg font-bold" style={{ color: "var(--accent)" }}>
             {ROUND_NAMES[activeRound]}
@@ -145,46 +184,73 @@ export default function BracketPage() {
               key={matchup._id}
               matchup={matchup}
               participantSlug={participantSlug}
+              onClick={() => openMatchup(matchup)}
             />
           ))}
         </div>
       ) : (
-        // Desktop: full bracket view
+        // Desktop: split bracket with left/center/right
         <div className="overflow-x-auto p-6">
-          <div className="flex gap-2 min-w-max items-start">
-            {roundGroups.map((matchups, roundIndex) => {
-              const round = roundIndex + 1;
-              // Spacing increases per round to align matchups visually
-              const gap = round === 1 ? 8 : round === 2 ? 24 : round === 3 ? 72 : round === 4 ? 168 : 0;
-              const topPad = round === 1 ? 0 : round === 2 ? 16 : round === 3 ? 56 : round === 4 ? 136 : 0;
+          <div className="flex gap-2 min-w-max items-start justify-center">
+            {/* Left side: R1→R4 converging to center */}
+            <BracketSide
+              rounds={leftRounds}
+              participantSlug={participantSlug}
+              onMatchupClick={openMatchup}
+              side="left"
+            />
 
-              return (
-                <div key={round} className="flex flex-col" style={{ minWidth: round === 5 ? 240 : 220 }}>
-                  <div
-                    className="text-xs font-bold mb-3 px-1 uppercase tracking-wider"
-                    style={{ color: "var(--accent)" }}
-                  >
-                    {ROUND_NAMES[round]}
-                  </div>
-                  <div
-                    className="flex flex-col"
-                    style={{ gap, paddingTop: topPad }}
-                  >
-                    {matchups.map((matchup) => (
-                      <MatchupCard
-                        key={matchup._id}
-                        matchup={matchup}
-                        participantSlug={participantSlug}
-                        compact={round < 4}
-                      />
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+            {/* Championship center column */}
+            <div className="flex flex-col items-center" style={{ minWidth: 240 }}>
+              <div
+                className="round-header text-xs font-bold mb-3 px-1 uppercase tracking-wider text-center"
+                style={{ color: "var(--gold)" }}
+              >
+                Championship
+              </div>
+              <div style={{ paddingTop: 136 }}>
+                {championshipMatchup && (
+                  <MatchupCard
+                    matchup={championshipMatchup}
+                    participantSlug={participantSlug}
+                    championship
+                    onClick={() => openMatchup(championshipMatchup)}
+                  />
+                )}
+              </div>
+            </div>
+
+            {/* Right side: R4→R1 diverging from center */}
+            <BracketSide
+              rounds={rightRounds}
+              participantSlug={participantSlug}
+              onMatchupClick={openMatchup}
+              side="right"
+            />
           </div>
         </div>
       )}
+
+      {/* Matchup detail overlay */}
+      {selectedMatchup && (
+        <MatchupDetail
+          matchup={selectedMatchup}
+          participantSlug={participantSlug}
+          onClose={closeMatchup}
+        />
+      )}
     </div>
+  );
+}
+
+export default function BracketPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div style={{ color: "var(--text-dim)" }}>Loading bracket...</div>
+      </div>
+    }>
+      <BracketContent />
+    </Suspense>
   );
 }

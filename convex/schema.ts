@@ -9,6 +9,7 @@ export default defineSchema({
     seed: v.number(),
     youtubeUrl: v.optional(v.string()),
     avatarUrl: v.optional(v.string()),
+    tagline: v.optional(v.string()),
   })
     .index("by_seed", ["seed"])
     .index("by_slug", ["slug"]),

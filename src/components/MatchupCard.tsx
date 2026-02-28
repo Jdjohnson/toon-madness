@@ -4,7 +4,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 
-interface Character {
+export interface Character {
   _id: Id<"characters">;
   name: string;
   slug: string;
@@ -12,14 +12,15 @@ interface Character {
   seed: number;
   youtubeUrl?: string;
   avatarUrl?: string;
+  tagline?: string;
 }
 
-interface Vote {
+export interface Vote {
   participantSlug: string;
   characterId: Id<"characters">;
 }
 
-interface MatchupData {
+export interface MatchupData {
   _id: Id<"matchups">;
   round: number;
   position: number;
@@ -34,9 +35,11 @@ interface MatchupCardProps {
   matchup: MatchupData;
   participantSlug: string;
   compact?: boolean;
+  onClick?: () => void;
+  championship?: boolean;
 }
 
-export default function MatchupCard({ matchup, participantSlug, compact }: MatchupCardProps) {
+export default function MatchupCard({ matchup, participantSlug, compact, onClick, championship }: MatchupCardProps) {
   const castVote = useMutation(api.votes.castVote);
 
   const isActive = matchup.status === "active";
@@ -151,7 +154,11 @@ export default function MatchupCard({ matchup, participantSlug, compact }: Match
   const uniqueVoters = new Set(matchup.votes.map((v) => v.participantSlug)).size;
 
   return (
-    <div className={`matchup-card ${matchup.status}`}>
+    <div
+      className={`matchup-card ${matchup.status}${championship ? " championship" : ""}`}
+      onClick={onClick}
+      style={onClick ? { cursor: "pointer" } : undefined}
+    >
       {isActive && (
         <div className="vote-progress">
           <span>{uniqueVoters}/{totalVoters} voted</span>
