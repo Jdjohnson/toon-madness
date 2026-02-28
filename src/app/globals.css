@@ -1,26 +1,230 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #0a1628;
+  --bg-surface: #111d33;
+  --bg-card: #162340;
+  --text: #edf0f6;
+  --text-dim: #7a8ba8;
+  --accent: #f97316;
+  --accent-glow: rgba(249, 115, 22, 0.3);
+  --green: #22c55e;
+  --red: #ef4444;
+  --gold: #fbbf24;
+  --connector: #2a3f5f;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* Matchup card */
+.matchup-card {
+  background: var(--bg-card);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.matchup-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(249, 115, 22, 0.1);
+}
+
+.matchup-card.decided {
+  border-color: var(--green);
+  opacity: 0.85;
+}
+
+.matchup-card.locked {
+  border-color: var(--connector);
+  opacity: 0.5;
+}
+
+/* Character row inside matchup */
+.char-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: default;
+  transition: background 0.15s ease;
+  position: relative;
+}
+
+.char-row.voteable {
+  cursor: pointer;
+}
+
+.char-row.voteable:hover {
+  background: rgba(249, 115, 22, 0.1);
+}
+
+.char-row.winner {
+  background: rgba(34, 197, 94, 0.15);
+}
+
+.char-row.loser {
+  opacity: 0.4;
+}
+
+.char-row.voted {
+  background: rgba(249, 115, 22, 0.12);
+}
+
+.char-row + .char-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Seed badge */
+.seed-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+
+/* Character avatar */
+.char-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--bg-surface);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Vote dots */
+.vote-dots {
+  display: flex;
+  gap: 3px;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.vote-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  object-fit: cover;
+  border: 1.5px solid var(--accent);
+}
+
+/* Bracket connectors */
+.bracket-connector {
+  position: absolute;
+  border-color: var(--connector);
+  border-style: solid;
+}
+
+/* Participant picker */
+.participant-card {
+  background: var(--bg-card);
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.participant-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 30px rgba(249, 115, 22, 0.2);
+}
+
+.participant-card img {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  object-fit: cover;
+  background: var(--bg-surface);
+}
+
+/* Winner banner */
+@keyframes confetti-fall {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+.confetti-piece {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  top: -10px;
+  animation: confetti-fall 3s ease-in forwards;
+}
+
+/* Round tabs (mobile) */
+.round-tab {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  background: transparent;
+  color: var(--text-dim);
+  border: none;
+  cursor: pointer;
+}
+
+.round-tab.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* YouTube icon */
+.yt-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.yt-icon:hover {
+  opacity: 1;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--connector);
+  border-radius: 3px;
 }
