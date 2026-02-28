@@ -72,6 +72,12 @@ function BracketContent() {
     router.push(qs ? `/bracket?${qs}` : "/bracket", { scroll: false });
   }, [router, searchParams]);
 
+  const navigateTo = useCallback((matchup: MatchupData) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("matchup", matchup._id);
+    router.replace(`/bracket?${params.toString()}`, { scroll: false });
+  }, [router, searchParams]);
+
   if (!participantSlug || !bracket || !participants) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -112,13 +118,6 @@ function BracketContent() {
   // Navigation list for prev/next: all non-locked matchups in bracket order
   const navList = bracket.filter((m) => m.status !== "locked");
   const navIndex = selectedMatchup ? navList.findIndex((m) => m._id === selectedMatchup._id) : -1;
-
-  const navigateTo = useCallback((matchup: MatchupData) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("matchup", matchup._id);
-    router.replace(`/bracket?${params.toString()}`, { scroll: false });
-  }, [router, searchParams]);
-
   const onPrev = navIndex > 0 ? () => navigateTo(navList[navIndex - 1]) : null;
   const onNext = navIndex >= 0 && navIndex < navList.length - 1 ? () => navigateTo(navList[navIndex + 1]) : null;
   const positionLabel = navIndex >= 0 ? `${navIndex + 1} of ${navList.length}` : undefined;
