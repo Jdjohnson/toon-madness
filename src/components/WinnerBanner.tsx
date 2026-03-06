@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 interface WinnerBannerProps {
   characterName: string;
@@ -10,19 +10,26 @@ interface WinnerBannerProps {
 
 const CONFETTI_COLORS = ["#f97316", "#22c55e", "#fbbf24", "#ef4444", "#3b82f6", "#a855f7"];
 
-export default function WinnerBanner({ characterName, characterShow, avatarUrl }: WinnerBannerProps) {
-  const [pieces, setPieces] = useState<Array<{ id: number; left: number; color: string; delay: number; size: number }>>([]);
+function createConfettiPieces() {
+  return Array.from({ length: 50 }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+    delay: Math.random() * 2,
+    size: 6 + Math.random() * 10,
+    borderRadius: Math.random() > 0.5 ? "50%" : "2px",
+  }));
+}
 
-  useEffect(() => {
-    const generated = Array.from({ length: 50 }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-      delay: Math.random() * 2,
-      size: 6 + Math.random() * 10,
-    }));
-    setPieces(generated);
-  }, []);
+export default function WinnerBanner({ characterName, characterShow, avatarUrl }: WinnerBannerProps) {
+  const [pieces] = useState<Array<{
+    id: number;
+    left: number;
+    color: string;
+    delay: number;
+    size: number;
+    borderRadius: string;
+  }>>(createConfettiPieces);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
@@ -36,7 +43,7 @@ export default function WinnerBanner({ characterName, characterShow, avatarUrl }
             height: p.size,
             background: p.color,
             animationDelay: `${p.delay}s`,
-            borderRadius: Math.random() > 0.5 ? "50%" : "2px",
+            borderRadius: p.borderRadius,
           }}
         />
       ))}

@@ -44,7 +44,6 @@ export default function MatchupCard({ matchup, participantSlug, compact, onClick
 
   const isActive = matchup.status === "active";
   const isDecided = matchup.status === "decided";
-  const isLocked = matchup.status === "locked";
 
   const myVote = matchup.votes.find((v) => v.participantSlug === participantSlug);
 
@@ -57,7 +56,7 @@ export default function MatchupCard({ matchup, participantSlug, compact, onClick
     });
   }
 
-  function renderCharRow(character: Character | null, side: "top" | "bottom") {
+  function renderCharRow(character: Character | null) {
     if (!character) {
       return (
         <div className="char-row" style={{ minHeight: compact ? 40 : 48 }}>
@@ -164,8 +163,8 @@ export default function MatchupCard({ matchup, participantSlug, compact, onClick
           <span>{uniqueVoters}/{totalVoters} voted</span>
         </div>
       )}
-      {renderCharRow(matchup.topCharacter, "top")}
-      {renderCharRow(matchup.bottomCharacter, "bottom")}
+      {renderCharRow(matchup.topCharacter)}
+      {renderCharRow(matchup.bottomCharacter)}
     </div>
   );
 }

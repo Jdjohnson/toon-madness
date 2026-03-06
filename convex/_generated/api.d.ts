@@ -11,6 +11,7 @@
 import type * as admin from "../admin.js";
 import type * as matchups from "../matchups.js";
 import type * as seed from "../seed.js";
+import type * as tournament from "../tournament.js";
 import type * as votes from "../votes.js";
 
 import type {
@@ -23,6 +24,7 @@ declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   matchups: typeof matchups;
   seed: typeof seed;
+  tournament: typeof tournament;
   votes: typeof votes;
 }>;
 

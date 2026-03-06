@@ -1,3 +1,4 @@
+import { Id } from "./_generated/dataModel";
 import { mutation } from "./_generated/server";
 
 const CHARACTERS = [
@@ -67,7 +68,7 @@ export const initBracket = mutation({
     }
 
     // Insert characters
-    const seedToId = new Map<number, string>();
+    const seedToId = new Map<number, Id<"characters">>();
     for (const char of CHARACTERS) {
       const id = await ctx.db.insert("characters", {
         name: char.name,
@@ -95,8 +96,8 @@ export const initBracket = mutation({
       await ctx.db.insert("matchups", {
         round: 1,
         position: pos,
-        topCharacterId: seedToId.get(topSeed)! as any,
-        bottomCharacterId: seedToId.get(bottomSeed)! as any,
+        topCharacterId: seedToId.get(topSeed)!,
+        bottomCharacterId: seedToId.get(bottomSeed)!,
         status: "active",
       });
     }

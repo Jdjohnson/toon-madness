@@ -17,12 +17,19 @@ const FALLBACK_PARTICIPANTS = [
 export default function Home() {
   const convexParticipants = useQuery(api.matchups.getParticipants);
   const router = useRouter();
-  const [existing, setExisting] = useState<string | null>(null);
+  const [existing] = useState<string | null>(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+    return localStorage.getItem("toon-madness-participant");
+  });
 
   useEffect(() => {
-    const slug = localStorage.getItem("toon-madness-participant");
-    if (slug) setExisting(slug);
-  }, []);
+    if (!existing) {
+      return;
+    }
+    router.push("/bracket");
+  }, [existing, router]);
 
   // Use Convex data if available and non-empty, otherwise use fallback
   const participants = convexParticipants?.length ? convexParticipants : FALLBACK_PARTICIPANTS;
@@ -33,7 +40,6 @@ export default function Home() {
   }
 
   if (existing) {
-    router.push("/bracket");
     return null;
   }
 
