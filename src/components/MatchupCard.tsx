@@ -71,9 +71,11 @@ export default function MatchupCard({ matchup, participantSlug, compact, onClick
     const isMyVote = myVote?.characterId === character._id;
     const votesForChar = matchup.votes.filter((v) => v.characterId === character._id);
 
+    const isInlineVotingEnabled = isActive && !onClick;
+
     const classes = [
       "char-row",
-      isActive ? "voteable" : "",
+      isInlineVotingEnabled ? "voteable" : "",
       isWinner ? "winner" : "",
       isLoser ? "loser" : "",
       isMyVote && isActive ? "voted" : "",
@@ -84,7 +86,11 @@ export default function MatchupCard({ matchup, participantSlug, compact, onClick
     return (
       <div
         className={classes}
-        onClick={() => isActive && handleVote(character._id)}
+        onClick={() => {
+          if (isInlineVotingEnabled) {
+            void handleVote(character._id);
+          }
+        }}
         style={{ minHeight: compact ? 40 : 48 }}
       >
         <div className="seed-badge">{character.seed}</div>

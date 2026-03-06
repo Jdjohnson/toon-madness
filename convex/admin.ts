@@ -129,3 +129,26 @@ export const finalizeCurrentRound = internalMutation({
     };
   },
 });
+
+export const removeParticipantVote = internalMutation({
+  args: {
+    matchupId: v.id("matchups"),
+    participantSlug: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const vote = await ctx.db
+      .query("votes")
+      .withIndex("by_matchup_participant", (q) =>
+        q.eq("matchupId", args.matchupId).eq("participantSlug", args.participantSlug)
+      )
+      .unique();
+
+    if (!vote) {
+      return { success: true, removed: false };
+    }
+
+    await ctx.db.delete(vote._id);
+
+    return { success: true, removed: true };
+  },
+});
