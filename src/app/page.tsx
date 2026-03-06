@@ -2,6 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -34,11 +35,6 @@ export default function Home() {
   // Use Convex data if available and non-empty, otherwise use fallback
   const participants = convexParticipants?.length ? convexParticipants : FALLBACK_PARTICIPANTS;
 
-  function pickParticipant(slug: string) {
-    localStorage.setItem("toon-madness-participant", slug);
-    router.push("/bracket");
-  }
-
   if (existing) {
     return null;
   }
@@ -57,10 +53,13 @@ export default function Home() {
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 max-w-2xl w-full">
         {participants.map((p) => (
-          <button
+          <Link
             key={p.slug}
             className="participant-card"
-            onClick={() => pickParticipant(p.slug)}
+            href={`/bracket?participant=${encodeURIComponent(p.slug)}`}
+            onClick={() => {
+              localStorage.setItem("toon-madness-participant", p.slug);
+            }}
           >
             <img
               src={`/participants/${p.slug}.png`}
@@ -70,7 +69,7 @@ export default function Home() {
               }}
             />
             <div className="text-lg font-bold text-white">{p.name}</div>
-          </button>
+          </Link>
         ))}
       </div>
     </main>

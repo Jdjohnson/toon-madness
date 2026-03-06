@@ -28,15 +28,34 @@ function BracketContent() {
   const [isMobile, setIsMobile] = useState(false);
 
   const selectedMatchupId = searchParams.get("matchup");
+  const participantFromUrl = searchParams.get("participant");
 
   useEffect(() => {
-    const slug = localStorage.getItem("toon-madness-participant");
+    const storedSlug = localStorage.getItem("toon-madness-participant");
+    const slug = participantFromUrl || storedSlug;
+
     if (!slug) {
       router.push("/");
       return;
     }
+
+    if (participantFromUrl) {
+      localStorage.setItem("toon-madness-participant", participantFromUrl);
+    }
+
     setParticipantSlug(slug);
-  }, [router]);
+  }, [participantFromUrl, router]);
+
+  useEffect(() => {
+    if (!participantFromUrl) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("participant");
+    const qs = params.toString();
+    router.replace(qs ? `/bracket?${qs}` : "/bracket", { scroll: false });
+  }, [participantFromUrl, router, searchParams]);
 
   useEffect(() => {
     function checkMobile() {
